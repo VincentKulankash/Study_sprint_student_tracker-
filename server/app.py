@@ -124,19 +124,23 @@ def delete(session_id):
     study_sessions.remove(s)
     return jsonify({'Message': f"Study session {session_id} deleted"}), 200
 
+#create set_focus_mode route that gets data from frontend 
+@app.route('/api/focus-mode', methods=['POST'])
+def set_focus_mode():
+    data = request.get_json(silent=True) or {}
+    mode = data.get('mode')
+    allowed_modes= {'standard', 'deep', 'revision', 'practice'}
 
+    if mode not in allowed_modes:
+        return jsonify({'Error': 'Invalid focus mode.'}), 400
 
-# TODO 7 - MANUAL COOKIE
-# Endpoint: POST /api/focus-mode
-# Goal:
-#   - Read JSON such as {"mode": "deep"}.
-#   - Accept only: standard, deep, revision, practice.
-#   - Return a 400 JSON error for another value.
-#   - Create a Flask response and set a cookie named "focus_mode".
-#   - Make the cookie last for 7 days.
-#   - Return a JSON success response.
-# Hint: make_response(...) and response.set_cookie(...) may help.
+    response = make_response(jsonify({
+        'message': 'Focus mode updated',
+        'focus-mode': mode,
+    }))
 
+    response.set_cookie('focus_mode', mode, max_age=7 * 24 * 60 * 60)
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
