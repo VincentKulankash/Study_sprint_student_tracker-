@@ -39,20 +39,21 @@ def get_study_sessions():
     return jsonify(study_sessions), 200
 
 
-# -----------------------------------------------------------------------------
-# STUDENT TODO AREA
-# Build the routes below yourself. Read README.md and static/js/app.js first.
-# The comments intentionally give hints without giving the solutions.
-# -----------------------------------------------------------------------------
+#Successfully implemented sessions and cookie read
+@app.route('/api/me')
+def get_current_user():
+    username = session.get('username')
+    visits = session.get('visits', 0) + 1
+    session['visits'] = visits
+    focus_mode = request.cookies.get('focus_mode')
 
-# TODO 1 - SESSION + COOKIE READ
-# Endpoint: GET /api/me
-# Goal:
-#   - Read the learner's username from Flask session storage.
-#   - Keep a session-based visit counter and increase it on each request.
-#   - Read the non-sensitive "focus_mode" cookie from the incoming request.
-#   - Return username, visits, and focus_mode as JSON.
-# Hint: session.get(...) and request.cookies.get(...) may help.
+    return jsonify({
+        'username': username,
+        'visits': visits,
+        'focus_mode': focus_mode,
+    }), 200
+
+
 
 #Successfully implemented login
 @app.route('/api/login', methods=['POST'])
@@ -82,18 +83,28 @@ def logout():
     session.clear()
     return jsonify({'message': 'Logged out successfully'}), 200
 
+#create study sessions
+@app.route('/api/study-sessions', methods=['POST'])
+def create_study_sessions():
+    data = request.get_json(silent=True) or {}
+    topic = data.get("topic", "").strip()
+    minutes = data.get('minutes')
 
+    if not topic:
+        return jsonify({'Error':'Topic is required'}), 400
 
-# TODO 4 - CREATE
-# Endpoint: POST /api/study-sessions
-# Goal:
-#   - Read JSON containing topic and minutes.
-#   - Validate the input.
-#   - Create a unique integer id.
-#   - Set completed to False for a new sprint.
-#   - Append the new item to study_sessions.
-#   - Return the created item as JSON.
-# Hint: inspect the JavaScript request body in static/js/app.js.
+    if not isinstance(minutes, int) or minutes <= 0:
+        return jsonify({'Error': 'Minutes must be a positive integer'})
+
+    new_id = 1 if not study_sessions else max(item['id'] for item in study_sessions) + 1
+    new_session = {
+        'id': new_id,
+        'topic': topic,
+        'minutes': minutes,
+        'completed': False,
+    }
+
+    study_sessions.append(new_session), 201
 
 
 # TODO 5 - UPDATE
