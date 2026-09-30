@@ -76,12 +76,12 @@ def login():
         }), 200
 
 
-# TODO 3 - LOGOUT
-# Endpoint: POST /api/logout
-# Goal:
-#   - Clear the current Flask session.
-#   - Return a success message as JSON.
-# Hint: Flask session has a method that clears all stored session values.
+# implement logout feature 
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'message': 'Logged out successfully'}), 200
+
 
 
 # TODO 4 - CREATE
