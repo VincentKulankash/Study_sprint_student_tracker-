@@ -23,10 +23,6 @@ def find_study_session(session_id):
     return None
 
 
-# -----------------------------------------------------------------------------
-# STARTING ROUTES PROVIDED TO STUDENTS
-# -----------------------------------------------------------------------------
-
 @app.route("/")
 def index():
     """Serve the supplied client-side application."""
@@ -106,23 +102,28 @@ def create_study_sessions():
 
     study_sessions.append(new_session), 201
 
+#create the update route using patch method and return a json 
+@app.route('/api/study-sessions/<int:session_id>', methods=['PATCH'])
+def update_study_sessions(session_id):
+    s = find_study_session(session_id)
 
-# TODO 5 - UPDATE
-# Endpoint: PATCH /api/study-sessions/<int:session_id>
-# Goal:
-#   - Find the requested sprint using find_study_session(...).
-#   - Return a 404 JSON error when the id does not exist.
-#   - Mark the sprint as completed.
-#   - Return the updated sprint as JSON.
+    if s is None:
+        return jsonify({'Error': 'Study session not found'}), 404
 
+    s['completed'] = True
+    return jsonify(s), 200
 
-# TODO 6 - DELETE
-# Endpoint: DELETE /api/study-sessions/<int:session_id>
-# Goal:
-#   - Find the requested sprint.
-#   - Return a 404 JSON error when the id does not exist.
-#   - Remove it from study_sessions.
-#   - Return a useful JSON confirmation.
+#create the delete route to remove session by their id 
+@app.route('/api/study-sessions/<int:session_id>', methods=['DELETE'])
+def delete(session_id):
+    s = find_study_session(session_id)
+
+    if s is None:
+        return jsonify({'Error': 'Study session not found'}), 404
+
+    study_sessions.remove(s)
+    return jsonify({'Message': f"Study session {session_id} deleted"}), 200
+
 
 
 # TODO 7 - MANUAL COOKIE
